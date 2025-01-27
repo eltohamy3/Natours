@@ -23,21 +23,6 @@ mongoose
   });
 const port = process.env.PORT || 8000;
 console.log(`the current port is ${process.env.PORT}`);
-//console.log(app.get('env'));
-//console.log(process.env);
-
-// const testTour = new Tour({
-//   name: "The Park Camper Eltoo My too",
-// });
-// testTour
-//   .save()
-//   .then((doc) => {
-//     console.log("Newly created tour", doc);
-//   })
-//   .catch((err) => {
-//     console.log("ERROR : ", err);
-//   });
-// const x = 3;
 app.listen(port, () => {
   console.log(`App is running on port ${port}`);
 });

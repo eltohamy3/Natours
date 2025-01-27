@@ -5,60 +5,99 @@ const Tour = require("./../models/tourModel");
 
 const tours = [] ;
 
-/*
-exports.checkId = (req, res, next, val) => {
-  console.log(`The value is ${val}`);
+exports.getAllTours = async (req, res) => {
 
-  if (val * 1 > tours.length) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
+
+   try{
+   const AllTour = await Tour.find() ;
+
+   res.status(200).json({
+    status: 'success',
+    result: AllTour.length,
+    data: {
+      tours: AllTour,
+    },
+  });
+   }catch(err){
+    res.status(400).json({
+      status: "failure",
+      message: err,
+    });
+   }
+
+};
+exports.CreatTours = async (req, res) => {
+  try {
+    console.log("Request body:", req.body); // Log the request body
+    const newTour = await Tour.create(req.body);
+    res.status(201).json({
+      status: "success  ",
+      data: {
+        tour: newTour,
+      },
+    });
+  } catch (e) {
+    res.status(400).json({
+      status: "failure",
+      message: e,
     });
   }
-  next();
 };
-*/
-exports.getAllTours = (req, res) => {
-  console.log(req.requestTime1);
-  console.log('Hear in getAll Tours');
-  res.status(200).json({
-    requesteAt: req.requestTime1,
-    status: 'success',
-    result: tours.length,
-    data: {
-      tours: tours,
-    },
-  });
-};
-exports.CreatTours = (req, res) => {
-  console.log(req.requestTime1);
 
-  // console.log(req.body) ;
+exports.getTour = async(req, res) => {
   
-      res.status(201).json({
-        requesteAt: req.requestTime1,
-        status: 'success  ',
-        data: {
-        },
-      });
-    }
-exports.UpdateTour_patch = (req, res) => {
-  console.log('Heare in get update tours');
+  try{
+     const MyTour =   await Tour.findById(req.params.id) ;
+     res.status(200).json({
+      status: "success",
+      data: {
+        tour: MyTour,
+      },
+     });
 
-  console.log(req.requestTime1);
-  res.status(200).json({
-    requesteAt: req.requestTime1,
-    status: 'success',
-    data: {
-      tour: '<Updated Tour Hear',
-    },
+  }catch(err){
+  res.status(400).json({
+    status: "failure",
+    message: err,
   });
+  }
 };
-exports.deleteTour = (req, res) => {
-  console.log(req.requestTime1);
-  res.status(204).json({
-    requesteAt: req.requestTime1,
-    status: 'success',
-    data: null,
-  });
+exports.UpdateTour =async (req, res) => {
+
+  // /:id
+  try{
+    const updatedTour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    res.status(200).json({
+      status: 'success',
+      data: {
+        tour: updatedTour,
+      },
+    });
+  }catch(err){
+    res.status(400).json({
+      status: "failure",
+      message: err,
+    });
+  }
+
+};
+exports.deleteTour =async (req, res) => {
+  try{
+    const DTour =   await Tour.findByIdAndDelete(req.params.id) ;
+    res.status(200).json({
+     status: "success",
+     data: {
+       tour: DTour,
+     },
+    });
+
+ }catch(err){
+ res.status(400).json({
+   status: "failure",
+   message: err,
+ });
+ }
 };

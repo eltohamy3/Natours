@@ -6,9 +6,9 @@ const router =express.Router();
 
 
 // router.param('id' ,tourController.checkId); 
-router.route('/').get(tourController.getAllTours).post( tourController.checkBody, tourController.CreatTours);
+router.route('/').get(tourController.getAllTours).post(tourController.CreatTours);
 
-router.route('/:id').patch(tourController.UpdateTour_patch).delete(tourController.deleteTour);
+router.route('/:id').get(tourController.getTour).patch(tourController.UpdateTour).delete(tourController.deleteTour);
 
 
 module.exports = router ; 
