@@ -25,8 +25,37 @@ exports.getAllTours = async (req, res) => {
    console.log(QueryString) ;
    console.log(JSON.parse(QueryString)) ;
     
-   const query = Tour.find(JSON.parse(QueryString)) ;
 
+   let query = Tour.find(JSON.parse(QueryString)) ;
+   // 3) sorting
+   if (req.query.sort){
+    console.log(req.query.sort) ;
+    let sortByString = req.query.sort.split(',').join(' ') ;
+    console.log(sortByString) ; 
+      query = query.sort(sortByString) ;
+   }else{
+    query = query.sort('-createdAt') ;
+   }
+   // 4) limiting fields
+     if (req.query.fields){
+      const fields = req.query.fields.split(',').join(' ') ;
+      query = query.select(fields);
+     }else{
+      query = query.select('-__v') ;
+     }
+
+     // 5) pagination
+     let defaultPage = (req.query.page*1) ||1 ; 
+     let defaultLimit = (req.query.limit*1) || 100;
+     const NoOfskipedDucomment = (defaultPage-1) * defaultLimit  ;
+     query = query.skip(NoOfskipedDucomment).limit(defaultLimit) ;
+
+     if (req.query.page ){
+      const CountAllTours = await Tour.countDocuments() ;
+      if (NoOfskipedDucomment >= CountAllTours){
+        throw new Error('This page is not exist'); 
+      }
+     }
 
        // EXEXUTE QUERY
 
@@ -41,9 +70,9 @@ exports.getAllTours = async (req, res) => {
     },
   });
    }catch(err){
-    res.status(400).json({
+    res.status(404).json({
       status: "failure",
-      message: err,
+      message:`${err}`,
     });
    }
 
@@ -122,4 +151,10 @@ exports.deleteTour =async (req, res) => {
    message: err,
  });
  }
+};
+exports.aliasTopTours = (req, res , next) => {
+  req.query.limit = '5';
+  req.query.sort = 'ratingsAverage,price';
+ req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
 };
