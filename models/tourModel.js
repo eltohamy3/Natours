@@ -1,11 +1,13 @@
 
 const mongoose = require("mongoose");
+const slugify = require("slugify");
 const tourSchema = new mongoose.Schema({
   name: {
     type: String,
     unique: [true, "A tour must have a unique name"],
     required: [true, "A tour must have a name"], // Ensure it's marked as required
   },
+  slug: String,
   duration: {
     type: Number,
     required: [true, "A tour must have a duration"],
@@ -56,8 +58,26 @@ const tourSchema = new mongoose.Schema({
     
   }, 
   startDates: [Date]
+} , 
+{
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
+tourSchema.virtual('durationWeeks').get( function () {
+  return this.duration / 7;
+
+}) ;
+
+tourSchema.pre('save' , function (next) {
+  console.log(this) ;
+  this.slug = slugify(this.name , { lower: true });
+  next();
+}) ;
+tourSchema.post('save' , function (doc , next) {
+  console.log("New tour has been saved:", doc);
+  next();
+}) ;
 const Tour = mongoose.model("Tour", tourSchema);
 
 module.exports = Tour;
