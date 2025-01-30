@@ -57,7 +57,12 @@ const tourSchema = new mongoose.Schema({
     select: false, // exclude this field from the output
     
   }, 
-  startDates: [Date]
+  startDates: [Date] , 
+  secretTour: {
+    type: Boolean,
+    default: false,
+  //  select: false, // exclude this field from the output
+  }
 } , 
 {
   toJSON: { virtuals: true },
@@ -78,6 +83,12 @@ tourSchema.post('save' , function (doc , next) {
   console.log("New tour has been saved:", doc);
   next();
 }) ;
+tourSchema.pre(/^find/ , function (next) {
+  this.find({ secretTour: {$ne : true} });
+  next();
+}) ;
+
+
 const Tour = mongoose.model("Tour", tourSchema);
 
 module.exports = Tour;
