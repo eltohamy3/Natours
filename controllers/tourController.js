@@ -3,8 +3,8 @@
 /* eslint-disable prettier/prettier */
 const Tour = require("./../models/tourModel");
 const APIFeatures = require("./../utils/APIFeatures");
-
 const catchAsync = require("./../utils/catchAsync");
+const AppError = require('./../utils/appError') ;
 
 // Get all tours
 
@@ -37,6 +37,10 @@ exports.CreatTours = catchAsync(async (req, res, next) => {
 
 exports.getTour = catchAsync(async (req, res, next) => {
   const MyTour = await Tour.findById(req.params.id);
+
+  if (!MyTour) {
+    return next(new AppError("No tour found with that ID", 404));
+  }
   res.status(200).json({
     status: "success",
     data: {
@@ -59,6 +63,9 @@ exports.UpdateTour = catchAsync(async (req, res, next) => {
 });
 exports.deleteTour = catchAsync(async (req, res, next) => {
   const DTour = await Tour.findByIdAndDelete(req.params.id);
+  if (!DTour) {
+    return next(new AppError("No tour found with that ID", 404));
+  }
   res.status(204).json({
     status: "success",
     data: {
