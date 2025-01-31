@@ -2,8 +2,9 @@
 // core modules
 
 const express = require('express');
-
+const AppError = require('./utils/appError') ;
 const app = express();
+const globalErrorHandler = require('./controllers/errorController') ;
 app.use(express.json()); // to get the data of the body
 
 const morgan = require('morgan');
@@ -26,24 +27,11 @@ app.use('/api/v1/users', userRouter);
 // 4) Error handling middleware
 
 app.all('*' , (req , res , next) =>{
-  // res.status(404).json({
-  //   status: 'fail',
-  //   message: `Can't find ${req.originalUrl} on this server`
-  // });
-  const err = new Error(`Can't find ${req.originalUrl} on this server`) ; 
-  err.statusCode = 404;
-  err.status = "fail"; 
-  next(err);// in this express know that it is an error and then skip all the other middleware and 
+
+  next(new AppError(`Can't find ${req.originalUrl} on this server` , 404));// in this express know that it is an error and then skip all the other middleware and 
   // go the the global middleware handler only by pass the error  to the next function
 })  
 
 // error Handling middleware
-app.use((err , req , res , next)=>{
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || "error";
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-  });
-})
+app.use(globalErrorHandler)
 module.exports = app;
