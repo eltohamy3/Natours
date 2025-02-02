@@ -50,6 +50,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
 });
 exports.UpdateTour = catchAsync(async (req, res, next) => {
   // /:id
+  
   const updatedTour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,

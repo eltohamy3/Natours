@@ -20,9 +20,29 @@ mongoose
   .then((con) => {
  //   console.log(con.connection);
     console.log("Connected to MongoDB successful"); //this will be printed when the connection is successful.
-  });
+  }).catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
+  }) ;
 const port = process.env.PORT || 8000;
 console.log(`the current port is ${process.env.PORT}`);
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`App is running on port ${port}`);
 });
+
+process.on('unhandledRejection' , err =>{
+  console.error('UNHANDLED REJECTION! :', err);
+  server.close(()=>{
+    console.error('Server is closing down...');
+    process.exit(1);
+  })
+  
+});
+
+process.on ('uncaughtException' , err=>{
+  console.error('UNCAUGHT EXCEPTION! :', err);
+  server.close(()=>{
+    console.error('Server is closing down...');
+    process.exit(1);
+  });
+
+}) ;

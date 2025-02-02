@@ -1,0 +1,70 @@
+const mongoose = require("mongoose");
+const slugify = require("slugify");
+const validator = require("validator");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, "A user must have a name"],
+    maxLength: [50, "The maximum number of characters is 50 characters"],
+    minLength: [5, "The minimum number of characters is 5 characters"],
+    trim: true,
+    unique: true,
+  },
+
+  email: {
+    type: String,
+    required: [true, "A user must have a email"],
+    unique: true,
+    lowercase: true,
+    validate: [validator.isEmail, "Please enter a valid email"],
+  },
+  password: {
+    type: String,
+    required: [true, "A user must have a password"],
+    minLength: [8, "The minimum number of characters is 8 characters"],
+    select: false,
+  },
+  confirmPassword: {
+    type: String,
+    required: [true, "A user must have a confirm password"],
+    validate: {
+      validator: function (value) {
+        return value === this.password;
+      },
+      message: "Passwords do not match",
+    },
+  },
+  photo: {
+    type: String,
+    // default : 'default.jpg' ,
+  },
+});
+
+userSchema.pre("save", async function (next) {
+  // it run this function if only the password is modified
+  if (!this.isModified("password")) return next();
+  const salt = await bcrypt.genSalt(12); // create a random slat with a complexity factor with 10
+  this.password = await bcrypt.hash(this.password, salt);
+
+  this.confirmPassword = undefined;
+
+  next();
+});
+userSchema.methods.generateAuthToken = function () {
+  const token = jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+  return token;
+};
+
+userSchema.methods.ComparePassword = async function (candidatePassword , userPassword){
+
+    return await bcrypt.compare(candidatePassword , userPassword) ;
+    
+}
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;
