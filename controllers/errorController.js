@@ -41,6 +41,9 @@ const handelvalidationErrorDB = err =>{
     return new AppError(message, 400);
 
 }
+const handelJWTError =()=> new AppError('Invalid token , Please log in again!' , 401);
+const handTokenExpiredError =()=> new AppError('The token expired Date is ended please log in again' , 401);
+
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
@@ -61,6 +64,12 @@ module.exports = (err, req, res, next) => {
     }
     if (err.name === "ValidationError"){
         error = handelvalidationErrorDB(err);
+    }
+    if (err.name ==="JsonWebTokenError"){
+      error = handelJWTError(err); 
+    }
+    if (err.name === "TokenExpiredError"){
+      error = handTokenExpiredError(err) ;
     }
 
 

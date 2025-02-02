@@ -4,6 +4,7 @@ const APIFeatures = require("./../utils/APIFeatures");
 const AppError = require("./../utils/appError");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const {promisify} = require('util') ;
 
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
@@ -39,10 +40,40 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError("email or password is  incorrect" , 401) );
   }
   // 3 ) send the token to the user since it login successfully
-  
+
   const token = user.generateAuthToken();
   res.status(201).json({
     status: "success",
     token: token,
   });
 });
+exports.protect = catchAsync( async(req, res , next)=>{
+  // distruct the body ;
+   // 1) get the token and check of it's there
+
+   const authHeader = req.headers.authorization ;
+   let token; 
+   if (authHeader && (authHeader.startsWith('Bearer '))){
+        token = authHeader.split(' ')[1] ;
+   }
+   if (!token){
+       // - get the token 
+    return next (new AppError('your are not log in! Please log in to get acccess.' , 401)); 
+   }
+   /// 2) verification token 
+   const payload = await promisify( jwt.verify)(token , process.env.JWT_SECRET) ;
+
+   // 3) check if user still exists
+     const user = await User.findById(payload.id) ; 
+
+     if (!user) return next(new AppError('the user  belonging to this token does no longer exist'  , 401)) ;
+   // 4) Check if user changed password after token was issued
+   if (user.CheckPasswordChanged(payload.iat)) return next(new AppError('User recently changed password ! please log in again'  , 401 )); 
+
+   //  GRANt access the protected route
+   req.user = user ;
+
+   next() ;
+
+
+}) ;

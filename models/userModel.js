@@ -41,6 +41,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     // default : 'default.jpg' ,
   },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+    select: false, // exclude this field from the output
+  },
+  passwordChangedAt : {
+    type : Date , 
+  }
 });
 
 userSchema.pre("save", async function (next) {
@@ -63,8 +71,23 @@ userSchema.methods.generateAuthToken = function () {
 userSchema.methods.ComparePassword = async function (candidatePassword , userPassword){
 
     return await bcrypt.compare(candidatePassword , userPassword) ;
-    
 }
+
+userSchema.methods.CheckPasswordChanged = function ( JWTTimestamp){
+
+  // if this field exist then it might be changed it 
+  if (this.passwordChangedAt){
+    // i first convert the tpasswordChanged in ms and then divided by 1000 and parse the result 
+    const changedTimestamp = Math.floor(new Date(this.passwordChangedAt).getTime() / 1000);
+    return changedTimestamp > JWTTimestamp; 
+    
+  }
+
+  // all correct then return false
+  return false;
+
+}
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
