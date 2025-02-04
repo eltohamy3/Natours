@@ -11,7 +11,8 @@ router.route('/top-5-cheap').get( tourController.aliasTopTours,tourController.ge
 // router.param('id' ,tourController.checkId); 
 router.route('/').get(authController.protect ,tourController.getAllTours).post(tourController.CreatTours);
 
-router.route('/:id').get(tourController.getTour).patch(tourController.UpdateTour).delete(tourController.deleteTour);
+router.route('/:id').get(tourController.getTour).patch(tourController.UpdateTour)
+.delete(authController.protect , authController.restrictTo('admin') , tourController.deleteTour);
 
 
 

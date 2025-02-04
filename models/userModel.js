@@ -3,7 +3,7 @@ const slugify = require("slugify");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
+const crypto = require ('crypto')
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
   },
   confirmPassword: {
     type: String,
-    required: [true, "A user must have a confirm password"],
+    // required: [true, "A user must have a confirm password"],
     validate: {
       validator: function (value) {
         return value === this.password;
@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     // default : 'default.jpg' ,
   },
+  role:{
+    type: String , 
+    enum: ['user' , 'guide' , 'Lead-guide' , 'admin'] , 
+    default : 'user'  
+  } , 
   createdAt: {
     type: Date,
     default: Date.now(),
@@ -48,6 +53,12 @@ const userSchema = new mongoose.Schema({
   },
   passwordChangedAt : {
     type : Date , 
+  }  , 
+  passwordResetToken :{
+    type : String
+  }  , 
+  passwordResetExpires : {
+    type: Date
   }
 });
 
@@ -80,13 +91,36 @@ userSchema.methods.CheckPasswordChanged = function ( JWTTimestamp){
     // i first convert the tpasswordChanged in ms and then divided by 1000 and parse the result 
     const changedTimestamp = Math.floor(new Date(this.passwordChangedAt).getTime() / 1000);
     return changedTimestamp > JWTTimestamp; 
-    
   }
 
   // all correct then return false
   return false;
 
 }
+
+userSchema.methods.genratePasswordResetToken = function () {
+  // genrate a random token and then convert 
+  // code Explanation
+  /*
+        crypto.randomBytes(32).toString('hex')
+      crypto.randomBytes(32): Generates a random buffer of 32 bytes.
+      .toString('hex'): Converts the buffer into a hexadecimal string (a readable format).
+      This token is used as a reset token that will be sent to the user.
+      crypto.createHash('sha256').update(resetToken).digest('hex')
+
+      crypto.createHash('sha256'): Creates a SHA-256 hash function.
+      .update(resetToken): Takes the generated resetToken and feeds it into the hash function.
+      .digest('hex'): Outputs the hash in hexadecimal format.
+     -/// The purpose of this hashing is to store a hashed version of the token in the database for security reasons.
+  */ 
+  const resetToken = crypto.randomBytes(32).toString('hex') ;
+
+  const HashedToken = crypto.createHash('sha256').update(resetToken).digest('hex'); 
+  this.passwordResetToken = HashedToken ;
+  this.passwordResetExpires = Date.now()+ 10*60*1000 ;
+
+  return resetToken;
+};
 
 const User = mongoose.model("User", userSchema);
 
