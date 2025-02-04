@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { promisify } = require("util");
 
+const sendEmail = require("./../utils/email");
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
@@ -96,25 +97,53 @@ exports.restrictTo = (...roles) => {
     next();
   };
 };
+
 exports.forgotPassword = catchAsync(async (req, res, next) => {
-  // 1) get user baasede on posted emial
-  const user = await User.findOne({
-    email: req.body.email,
-  });
-  if (!user)
+  // 1) Get user based on posted email
+  const user = await User.findOne({ email: req.body.email });
+
+  if (!user) {
+    return next(new AppError("There is no user with this email address.", 404));
+  }
+
+  // 2) Generate the random reset token
+  const resetToken = user.generatePasswordResetToken();
+  console.log({ resetToken });
+
+  // 3) Save the changes
+  await user.save({ validateBeforeSave: false });
+
+  // 4) Send email with reset link
+  const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}`;
+  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: 
+  ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
+  const options = {
+    email: user.email,
+    subject: "Your password reset token (valid for 10 min)",
+    message: message,
+  };
+  console.log(options);
+
+  try {
+    console.log("heare befor sending ");
+    await sendEmail(options);
+    console.log("heare after sending ");
+    res.status(200).json({
+      status: "success",
+      message: "Token sent to email!",
+    });
+  } catch (err) {
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+
     return next(
-      new AppError("There is no user with  email addresss.", 404),
+      new AppError(
+        "There was an error while sending the email. Try again later!",
+        500,
+      ),
     );
-
-
-  // 2 ) generate the random rest token
-    const resetToken = user.genratePasswordResetToken(); 
-    console.log({resetToken}) ;
-  // 3) send it to user's email
-  await user.save(
-   {
-    validateBeforSave : false}
-  ) ;
-
+  }
 });
+
 exports.resetPassword = (req, res, next) => {};

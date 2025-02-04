@@ -98,7 +98,7 @@ userSchema.methods.CheckPasswordChanged = function ( JWTTimestamp){
 
 }
 
-userSchema.methods.genratePasswordResetToken = function () {
+userSchema.methods.generatePasswordResetToken = function () {
   // genrate a random token and then convert 
   // code Explanation
   /*

@@ -10,7 +10,7 @@ router.post('/login' , authController.login) ;
 
 // -------------forgot password --------------------------------------------
 router.post('/forgotPassword', authController.forgotPassword); // 
-router.post('/resetPassword' , authController.resetPassword) ;
+router.patch('/resetPassword/:token' , authController.resetPassword) ;
 
 
 /// this routers for system administration to change it 
