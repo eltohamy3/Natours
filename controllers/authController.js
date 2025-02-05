@@ -17,7 +17,7 @@ const createSendToken = (user, statusCode, res) => {
     cookieOptions.secure = true ;
   }
 
-  // remove the password from the outpu
+  // remove the password from the output
   user.password= undefined; 
   user.active = undefined
   // convert it to the ms 
