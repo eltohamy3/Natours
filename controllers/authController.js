@@ -9,6 +9,19 @@ const sendEmail = require("./../utils/email");
 
 const createSendToken = (user, statusCode, res) => {
   const token = user.generateAuthToken();
+  const cookieOptions = {
+    expires: new Date(Date.now() + (process.env.JWT_COOKIE_ECPIRES_IN * 24 *60 *60 *1000)) , 
+    httpOnly:true // allow access the cookie only by http 
+  } ;
+  if (process.env.NODE_ENV ==='production'){
+    cookieOptions.secure = true ;
+  }
+
+  // remove the password from the outpu
+  user.password= undefined; 
+  user.active = undefined
+  // convert it to the ms 
+  res.cookie('jwt' ,token , cookieOptions);
   res.status(statusCode).json({
     status: "success",
     token: token,
@@ -177,6 +190,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 exports.updatePassword = catchAsync(async (req, res, next) => {
   //1-) get the user from collection
   const user = await User.findById(req.user._id).select("+password");
+  console.log(user); 
   //2) check if posted current password is correct
   /// hear we already have a user so no need to check for it
   if (!(await user.ComparePassword(req.body.oldPassword, user.password)))

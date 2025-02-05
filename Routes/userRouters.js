@@ -19,6 +19,8 @@ router.route('/updateMyPassword').patch(authController.protect ,authController.u
 router.route('/updateMe').patch(authController.protect ,userController.updateMe) // 
 // router.patch('/resetPassword/:token' , authController.resetPassword) ;
 
+// delete user 
+router.route('/deleteMe').delete(authController.protect , userController.deleteMe) ;
 /// this routers for system administration to change it 
 router.route('/').get(userController.getAllUsers).post(userController.CreateUser);
 router.route('/:id').get(userController.getUser).patch(userController.UpdateUser).delete(userController.DeleteUser);

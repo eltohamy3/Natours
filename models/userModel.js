@@ -59,6 +59,11 @@ const userSchema = new mongoose.Schema({
   }  , 
   passwordResetExpires : {
     type: Date
+  } , 
+  active:{
+    type: Boolean , 
+    default : true , 
+    select : false
   }
 });
 
@@ -78,6 +83,12 @@ userSchema.pre("save", async function (next) {
 
   next();
 });
+userSchema.pre(/^find/ , function (next){
+  // this refears to the current query 
+  this.find({active : {$ne: false}}) ;
+  next() ;
+
+})
 userSchema.methods.generateAuthToken = function () {
   const token = jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,

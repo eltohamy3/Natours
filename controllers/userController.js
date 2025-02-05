@@ -4,15 +4,15 @@ const User = require("./../models/userModel");
 const APIFeatures = require("./../utils/APIFeatures");
 const AppError = require("./../utils/appError");
 
-const filterObj = (obj , ...allowedFields)=>{
-  let newObj = {} ;
-  Object.keys(obj).forEach( el =>{
-    if (allowedFields.includes(el) && obj[el]){
-      newObj[el]= obj[el] ;
+const filterObj = (obj, ...allowedFields) => {
+  let newObj = {};
+  Object.keys(obj).forEach((el) => {
+    if (allowedFields.includes(el) && obj[el]) {
+      newObj[el] = obj[el];
     }
-  }) ;
-  return newObj ;
-}
+  });
+  return newObj;
+};
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
   let userFeatures = new APIFeatures(User.find(), req.query)
@@ -97,9 +97,9 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     );
 
   /// 2 UPDATE THE  user document
-  console.log(req.body) ;
-  const updatedObject = filterObj(req.body , 'name' , 'email');
-  console.log(updatedObject) ;
+  console.log(req.body);
+  const updatedObject = filterObj(req.body, "name", "email");
+  console.log(updatedObject);
   const updatedUser = await User.findByIdAndUpdate(req.user.id, updatedObject, {
     new: true,
     runValidators: true,
@@ -107,8 +107,18 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    data : {
-      user : updatedUser
-    }
+    data: {
+      user: updatedUser,
+    },
+  });
+});
+
+exports.deleteMe = catchAsync(async (req, res, next) => {
+  await User.findByIdAndUpdate(req.user.id, {
+    active: false,
+  });
+  res.status(204).json({
+    status: "success",
+    data: null,
   });
 });
