@@ -6,19 +6,27 @@ const express = require('express');
 const AppError = require('./utils/appError') ;
 const app = express();
 const globalErrorHandler = require('./controllers/errorController') ;
+
 const rateLimit = require('express-rate-limit');
-app.use(express.json()); // to get the data of the body
+const helmet = require('helmet') ;
 
 const morgan = require('morgan');
 
 const userRouter = require('./Routes/userRouters');
 const tourRouter = require('./Routes/tourRouters');
 
+
 // 1) GLOBAL Middleware
+// Set Security HTTP header 
+app.use(helmet());
+
+
+// Development logging
 if (process.env.NODE_ENV==='development'){
-  app.use(morgan('dev')); // to know some information about the router
+  app.use(morgan('dev')); 
 }
 
+// Limit requests form same API
 const limiter = rateLimit({
   max : 100 ,  // for 100 request per hour
   windoMs : 60 *60 * 1000 ,  // for one hour
@@ -26,9 +34,17 @@ const limiter = rateLimit({
 });
 app.use('/api' , limiter) ;
 
-// to allow the static pages to be run on the serve
+// body parser , reading data from body int req.body and limit the size of the body to 10kb
+app.use(express.json({limit : '10kb'})); // to get the data of the body
+
+// to allow the static pages to be run on the server
 app.use(express.static(`${__dirname}/public`));
 
+// Test middleware 
+app.use((req, res , next) =>{
+  req.requestTime = new Date().toISOString() ;
+  next() ;
+})
 
 // 1) tourRouter
 
