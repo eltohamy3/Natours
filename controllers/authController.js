@@ -1,10 +1,9 @@
 const User = require("./../models/userModel");
 const catchAsync = require("./../utils/catchAsync");
-const APIFeatures = require("./../utils/APIFeatures");
 const AppError = require("./../utils/appError");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
 const { promisify } = require("util");
+const crypto = require("crypto");
 
 const sendEmail = require("./../utils/email");
 exports.signup = catchAsync(async (req, res, next) => {
@@ -146,4 +145,38 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
 });
 
-exports.resetPassword = (req, res, next) => {};
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  // 1 ) get the user based on the token
+  const messagetoken = req.params.token;
+  const HashedToken = crypto
+    .createHash("sha256")
+    .update(messagetoken)
+    .digest("hex");
+  const user = await User.findOne({
+    passwordResetToken: HashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+  // 2) if the token has not exired , and there is user , set the new password
+  if (!user) {
+    return next(new AppError("Token is invalid or has expired", 400));
+  }
+  user.password = req.body.password;
+  user.confirmPassword = req.body.confirmPassword;
+
+  // clear the passwordResetToken
+  user.passwordResetToken= undefined; 
+  user.passwordResetExpires= undefined; 
+
+
+  //3) update changedPasswordAt property for the user
+  // done by the middleware
+
+  await user.save({
+  });
+  // 4) log the user in , send JWT
+  const jwtToken = user.generateAuthToken();
+  res.status(200).json({
+    status: "success",
+    token: jwtToken,
+  });
+});

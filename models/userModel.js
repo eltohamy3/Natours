@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
 const validator = require("validator");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcryptjs"); // for passwrord hash
 const jwt = require("jsonwebtoken");
 const crypto = require ('crypto')
 const userSchema = new mongoose.Schema({
@@ -62,6 +62,13 @@ const userSchema = new mongoose.Schema({
   }
 });
 
+userSchema.pre('save' , function (next){
+  if (!this.isModified('password') || this.isNew) return next(); 
+
+  this.passwordChangedAt = Date.now() - 1000;
+  next() ;
+
+})
 userSchema.pre("save", async function (next) {
   // it run this function if only the password is modified
   if (!this.isModified("password")) return next();
