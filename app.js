@@ -9,6 +9,10 @@ const globalErrorHandler = require('./controllers/errorController') ;
 
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet') ;
+const mongoSanitize = require('express-mongo-sanitize') ;
+const  xxs = require ('xss-clean') ;
+const hpp = require('hpp') ;
+
 
 const morgan = require('morgan');
 
@@ -37,6 +41,19 @@ app.use('/api' , limiter) ;
 // body parser , reading data from body int req.body and limit the size of the body to 10kb
 app.use(express.json({limit : '10kb'})); // to get the data of the body
 
+// Data sanitzation against NoSQL query injection
+app.use(mongoSanitize()) ;
+
+// Data sanitzation against cross site scripting attaces 
+// clean the body from melicious scrits like html code 
+app.use(xxs()) ;
+
+// to prevent the http parameter pollution
+app.use(hpp(
+  {
+    whitelist :['name' , 'slug' , 'maxGroupSize' , 'difficulty' , 'ratingsAverage'  ,'price' ,'priceDiscount']
+  }
+)) ;
 // to allow the static pages to be run on the server
 app.use(express.static(`${__dirname}/public`));
 
