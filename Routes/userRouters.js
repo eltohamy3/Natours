@@ -15,6 +15,9 @@ router.patch('/resetPassword/:token' , authController.resetPassword) ;
 //----------------update Password-------------------------------
 router.route('/updateMyPassword').patch(authController.protect ,authController.updatePassword) // 
 // router.patch('/resetPassword/:token' , authController.resetPassword) ;
+//----------------update Data-------------------------------
+router.route('/updateMe').patch(authController.protect ,userController.updateMe) // 
+// router.patch('/resetPassword/:token' , authController.resetPassword) ;
 
 /// this routers for system administration to change it 
 router.route('/').get(userController.getAllUsers).post(userController.CreateUser);
