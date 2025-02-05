@@ -12,6 +12,9 @@ router.post('/login' , authController.login) ;
 router.post('/forgotPassword', authController.forgotPassword); // 
 router.patch('/resetPassword/:token' , authController.resetPassword) ;
 
+//----------------update Password-------------------------------
+router.route('/updateMyPassword').patch(authController.protect ,authController.updatePassword) // 
+// router.patch('/resetPassword/:token' , authController.resetPassword) ;
 
 /// this routers for system administration to change it 
 router.route('/').get(userController.getAllUsers).post(userController.CreateUser);

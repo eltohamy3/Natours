@@ -6,6 +6,17 @@ const { promisify } = require("util");
 const crypto = require("crypto");
 
 const sendEmail = require("./../utils/email");
+
+const createSendToken = (user, statusCode, res) => {
+  const token = user.generateAuthToken();
+  res.status(statusCode).json({
+    status: "success",
+    token: token,
+    data: {
+      user: user,
+    },
+  });
+};
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
@@ -13,14 +24,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     confirmPassword: req.body.confirmPassword,
     email: req.body.email,
   });
-  const token = newUser.generateAuthToken();
-  res.status(201).json({
-    status: "success",
-    token: token,
-    data: {
-      user: newUser,
-    },
-  });
+  createSendToken(newUser, 201, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -38,12 +42,7 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError("email or password is  incorrect", 401));
   }
   // 3 ) send the token to the user since it login successfully
-
-  const token = user.generateAuthToken();
-  res.status(201).json({
-    status: "success",
-    token: token,
-  });
+  createSendToken(user, 201, res);
 });
 exports.protect = catchAsync(async (req, res, next) => {
   // distruct the body ;
@@ -54,6 +53,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   if (authHeader && authHeader.startsWith("Bearer ")) {
     token = authHeader.split(" ")[1];
   }
+
   if (!token) {
     // - get the token
     return next(
@@ -144,7 +144,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     );
   }
 });
-
 exports.resetPassword = catchAsync(async (req, res, next) => {
   // 1 ) get the user based on the token
   const messagetoken = req.params.token;
@@ -164,19 +163,30 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.confirmPassword = req.body.confirmPassword;
 
   // clear the passwordResetToken
-  user.passwordResetToken= undefined; 
-  user.passwordResetExpires= undefined; 
-
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
 
   //3) update changedPasswordAt property for the user
   // done by the middleware
 
-  await user.save({
-  });
+  await user.save({});
   // 4) log the user in , send JWT
-  const jwtToken = user.generateAuthToken();
-  res.status(200).json({
-    status: "success",
-    token: jwtToken,
-  });
+  createSendToken(user, 200, res);
+});
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  //1-) get the user from collection
+  const user = await User.findById(req.user._id).select("+password");
+  //2) check if posted current password is correct
+  /// hear we already have a user so no need to check for it
+  if (!(await user.ComparePassword(req.body.oldPassword, user.password)))
+    return next(new AppError("your password is incorrect"), 401);
+
+  // 3) if so , update psassword
+  user.password = req.body.newPassword;
+  user.confirmPassword = req.body.newConfirmPassword;
+  await user.save();
+
+  // 4) log user in , send JWT
+  createSendToken(user, 200, res);
 });
