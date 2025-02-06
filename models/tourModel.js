@@ -25,7 +25,7 @@ const tourSchema = new mongoose.Schema(
     difficulty: {
       type: String,
       enum: ["easy", "medium", "hard"],
-      required: [true, "A tour must have a difficulty level"],
+      // required: [true, "A tour must have a difficulty level"],
     },
     ratingsAverage: {
       type: Number,
@@ -76,6 +76,31 @@ const tourSchema = new mongoose.Schema(
       default: false,
       //  select: false, // exclude this field from the output
     },
+    startLocation:{
+      // GeoJSON
+    
+        type:{
+          type: String , 
+          default : 'Point' , 
+          enum:['Point']
+        } ,
+        coordinates :[Number] ,
+        address : String , 
+        description : String 
+    } ,
+    locations:[
+      {
+        type:{
+          type: String , 
+          default : 'Point' , 
+          enum:['Point']
+        } ,
+        coordinates :[Number] ,
+        address : String , 
+        description : String  , 
+        day:Number
+      }
+    ]
   },
   {
     toJSON: { virtuals: true },

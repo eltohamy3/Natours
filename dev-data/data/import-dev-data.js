@@ -22,7 +22,7 @@ mongoose
     console.log("Connected to MongoDB successful"); //this will be printed when the connection is successful.
   });
 
-  const tours = fs.readFileSync('./tours-simple.json' , 'utf-8');
+  const tours = fs.readFileSync('./tours.json' , 'utf-8');
   const tourData = JSON.parse(tours);
 
   const importData= async ()=>{
