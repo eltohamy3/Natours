@@ -1,16 +1,15 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
 const validator = require("validator");
-const User = require('./userModel') ;
+const User = require("./userModel");
 const tourSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       unique: [true, "A tour must have a unique name"],
       required: [true, "A tour must have a name"], // Ensure it's marked as required
-      maxLength:[50, "A tour must have at most 50 characters"] , 
-      minLength:[10, "A tour must have at least 10 characters"] , 
-      
+      maxLength: [50, "A tour must have at most 50 characters"],
+      minLength: [10, "A tour must have at least 10 characters"],
     },
 
     slug: String,
@@ -44,12 +43,12 @@ const tourSchema = new mongoose.Schema(
     priceDiscount: {
       type: Number,
       validate: {
-        validator: function(val){
-          // this only work for create and donot work on update 
-          return this.price >= val; 
-        } ,
+        validator: function (val) {
+          // this only work for create and donot work on update
+          return this.price >= val;
+        },
         message: "Price must be equal to or greater than the discount price",
-      }
+      },
     },
     summary: {
       type: String,
@@ -77,32 +76,36 @@ const tourSchema = new mongoose.Schema(
       default: false,
       //  select: false, // exclude this field from the output
     },
-    startLocation:{
+    startLocation: {
       // GeoJSON
-    
-        type:{
-          type: String , 
-          default : 'Point' , 
-          enum:['Point']
-        } ,
-        coordinates :[Number] ,
-        address : String , 
-        description : String 
-    } ,
-    locations:[
+
+      type: {
+        type: String,
+        default: "Point",
+        enum: ["Point"],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
       {
-        type:{
-          type: String , 
-          default : 'Point' , 
-          enum:['Point']
-        } ,
-        coordinates :[Number] ,
-        address : String , 
-        description : String  , 
-        day:Number
-      }
-    ] , 
-    "guides" :Array
+        type: {
+          type: String,
+          default: "Point",
+          enum: ["Point"],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    //  "guides" :Array // this when make it as embedding document
+    guides: [{
+      type: mongoose.Schema.ObjectId,
+      ref : 'User'
+    }],
   },
   {
     toJSON: { virtuals: true },
@@ -114,14 +117,16 @@ tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
 });
 
-
-// this work only when create or save and not in the update process 
+// this work only when create or save and not in the update process
 // document middleware
 tourSchema.pre("save", function (next) {
   console.log(this);
   this.slug = slugify(this.name, { lower: true });
   next();
 });
+
+// to make the guide as Embedded document
+/*
 tourSchema.pre('save' , async function (next) {
   // this referes to the current document 
   const guidesPromise = this.guides.map(async (id) =>await User.findById(id)); 
@@ -130,12 +135,11 @@ tourSchema.pre('save' , async function (next) {
   this.guides = await Promise.all(guidesPromise) ;
   next(); 
 })
-
+*/
 tourSchema.post("save", function (doc, next) {
   console.log("New tour has been saved:", doc);
   next();
 });
-
 
 // query middleware
 tourSchema.pre(/^find/, function (next) {
@@ -146,9 +150,9 @@ tourSchema.pre(/^find/, function (next) {
 // aggregation middleware
 
 tourSchema.pre("aggregate", function (next) {
- // this.pipeline().match({ secretTour: { $ne: true } });
-  this.pipeline().unshift({$match: { secretTour: { $ne: true }}}); 
-  console.log(this.pipeline()) ;
+  // this.pipeline().match({ secretTour: { $ne: true } });
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+  console.log(this.pipeline());
   next();
 });
 const Tour = mongoose.model("Tour", tourSchema);
