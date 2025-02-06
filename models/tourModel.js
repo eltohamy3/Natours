@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
 const validator = require("validator");
+const User = require('./userModel') ;
 const tourSchema = new mongoose.Schema(
   {
     name: {
@@ -100,7 +101,8 @@ const tourSchema = new mongoose.Schema(
         description : String  , 
         day:Number
       }
-    ]
+    ] , 
+    "guides" :Array
   },
   {
     toJSON: { virtuals: true },
@@ -114,16 +116,28 @@ tourSchema.virtual("durationWeeks").get(function () {
 
 
 // this work only when create or save and not in the update process 
-
+// document middleware
 tourSchema.pre("save", function (next) {
   console.log(this);
   this.slug = slugify(this.name, { lower: true });
   next();
 });
+tourSchema.pre('save' , async function (next) {
+  // this referes to the current document 
+  const guidesPromise = this.guides.map(async (id) =>await User.findById(id)); 
+  // since the map  function is async function so it will return each user as a promise so we
+  // want to fetch the ussers inside thes promisses
+  this.guides = await Promise.all(guidesPromise) ;
+  next(); 
+})
+
 tourSchema.post("save", function (doc, next) {
   console.log("New tour has been saved:", doc);
   next();
 });
+
+
+// query middleware
 tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } });
   next();
