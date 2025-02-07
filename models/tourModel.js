@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
-const validator = require("validator");
-const User = require("./userModel");
+// const validator = require("validator");
 const tourSchema = new mongoose.Schema(
   {
     name: {
@@ -113,10 +112,26 @@ const tourSchema = new mongoose.Schema(
   },
 );
 
+// .get Adds a custom getter to this virtual.
+
 tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
 });
+/*
+    ref?: string | Function;
 
+    The local field to populate on if this is a populated virtual. 
+    localField?: string | Function;
+
+    The foreign field to populate on if this is a populated virtual. 
+    foreignField?: string | Function;
+*/
+// like join two tables
+tourSchema.virtual("reviews" , {
+  ref : "Review" , 
+  localField : "_id",
+  foreignField :"tour"
+});
 // this work only when create or save and not in the update process
 // document middleware
 tourSchema.pre("save", function (next) {

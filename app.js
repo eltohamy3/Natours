@@ -18,7 +18,7 @@ const morgan = require('morgan');
 
 const userRouter = require('./Routes/userRouters');
 const tourRouter = require('./Routes/tourRouters');
-
+const reviewRouter = require ('./Routes/reviewRouter') ;
 
 // 1) GLOBAL Middleware
 // Set Security HTTP header 
@@ -69,6 +69,8 @@ app.use('/api/v1/tours', tourRouter);
 // 2) User Routes
 app.use('/api/v1/users', userRouter);
 
+// 3) Review Router 
+app.use('/api/v1/reviews' , reviewRouter) ;
 // 4) Error handling middleware
 
 app.all('*' , (req , res , next) =>{
