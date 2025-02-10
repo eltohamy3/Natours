@@ -77,7 +77,6 @@ const tourSchema = new mongoose.Schema(
     },
     startLocation: {
       // GeoJSON
-
       type: {
         type: String,
         default: "Point",
@@ -117,6 +116,8 @@ const tourSchema = new mongoose.Schema(
 tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
 });
+tourSchema.index({price  :1 ,  ratingsAverage : 1}) ;
+tourSchema.index({slug : 1}) ;
 /*
     ref?: string | Function;
 
@@ -139,6 +140,7 @@ tourSchema.pre("save", function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
+
 
 // to make the guide as Embedded document
 /*
@@ -176,6 +178,9 @@ tourSchema.pre("aggregate", function (next) {
   console.log(this.pipeline());
   next();
 });
+
+
+
 const Tour = mongoose.model("Tour", tourSchema);
 
 module.exports = Tour;

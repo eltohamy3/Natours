@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const slugify = require("slugify");
-
+// const slugify = require("slugify");
+const Tour = require('./tourModel') ;
 const reviewSchema = mongoose.Schema(
   {
     user: {
@@ -45,6 +45,57 @@ reviewSchema.pre(/^find/, function (next) {
 // });
   next();
 });
+
+reviewSchema.statics.calcAverageRating = async function (tourId){
+  // this refers to the current Model  
+  const stats = await this.aggregate([ 
+    {
+      $match : {
+        tour : tourId
+      }
+    } ,
+    {
+      $group : {
+        _id: null,
+        avgRating: { $avg: "$rating" },
+        ratingsQuantity : { $sum : 1}
+      }
+    }
+  ]) ;
+  if (stats.length > 0){
+    await Tour.findByIdAndUpdate(tourId , {
+      ratingsAverage : stats[0].avgRating ,
+      ratingsQuantity : stats[0].ratingsQuantity
+     });
+  }else{
+    await Tour.findByIdAndUpdate(tourId , {
+      ratingsAverage : 0 ,
+      ratingsQuantity : 4.5
+     });
+  }
+
+
+}
+reviewSchema.post("save" , async function (doc , next){
+  // this points to the current review
+  // this.constructor => refers to the current 
+    this.constructor.calcAverageRating(doc.tour) ;
+    next(); 
+})
+/*
+we pass the review form the pre to middleware to the post middelware
+*/
+reviewSchema.pre(/^findOneAnd/ , async function (next){
+  // this points to the current query
+  this.review = await this.findOne() ;
+  console.log(this.review) ;
+  next(); 
+});
+reviewSchema.post(/^findOneAnd/ , async function (docs ,next){
+  // this points to the current query
+  await this.model.calcAverageRating(this.review.tour); 
+  next() ;
+})
 const Review = mongoose.model("Review", reviewSchema);
 
 module.exports = Review;

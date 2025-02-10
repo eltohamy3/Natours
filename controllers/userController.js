@@ -14,7 +14,7 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 exports.addUserId = (req ,res , next)=>{
-  req.params.id = req.user.id; 
+  req.params.id =   req.user.id; 
   next() ;
 }
 exports.getMe = factory.getOne(User) ;

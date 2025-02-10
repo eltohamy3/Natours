@@ -1,28 +1,42 @@
-const express = require('express');
+const express = require("express");
 
-const userController = require('./../controllers/userController'); 
-const authController = require('./../controllers/authController');
+const userController = require("./../controllers/userController");
+const authController = require("./../controllers/authController");
 const router = express.Router();
 
-router.post('/signup', authController.signup);
-router.post('/login' , authController.login) ;
-
+router.post("/signup", authController.signup);
+router.post("/login", authController.login);
 
 // -------------forgot password --------------------------------------------
-router.post('/forgotPassword', authController.forgotPassword); // 
-router.patch('/resetPassword/:token' , authController.resetPassword) ;
+router.post("/forgotPassword", authController.forgotPassword); //
+router.patch("/resetPassword/:token", authController.resetPassword);
 
 //----------------update Password-------------------------------
-router.route('/updateMyPassword').patch(authController.protect ,authController.updatePassword) // 
+
+// use authController
+router.use(authController.protect);
+router.route("/updateMyPassword").patch(authController.updatePassword); //
+
 // router.patch('/resetPassword/:token' , authController.resetPassword) ;
+
 //----------------update Data-------------------------------
-router.route('/updateMe').patch(authController.protect ,userController.updateMe) // 
+
+router.route("/updateMe").patch(userController.updateMe); //
 // router.patch('/resetPassword/:token' , authController.resetPassword) ;
+router.get("/me", userController.addUserId, userController.getMe);
 
-// delete user 
-router.route('/deleteMe').delete(authController.protect , userController.deleteMe) ;
-/// this routers for system administration to change it 
-router.route('/').get(userController.getAllUsers).post(userController.CreateUser);
-router.route('/:id').get(userController.getUser).patch(userController.UpdateUser).delete(userController.DeleteUser);
+// delete user
+router.route("/deleteMe").delete(userController.deleteMe);
 
+/// this routers for system administration to change it
+router.use(authController.restrictTo("admin"));
+router
+  .route("/")
+  .get(userController.getAllUsers)
+  .post(userController.CreateUser);
+router
+  .route("/:id")
+  .get(userController.getUser)
+  .patch(userController.UpdateUser)
+  .delete(userController.DeleteUser);
 module.exports = router;
