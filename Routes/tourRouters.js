@@ -1,3 +1,5 @@
+
+
 /* eslint-disable import/newline-after-import */
 
 const express = require("express");
@@ -8,6 +10,8 @@ const reviewRouter = require("./reviewRouter");
 const router = express.Router();
 
 router.route("/tour-stats").get(tourController.getTourStats);
+
+
 router
   .route("/monthly-plan/:year")
   .get(
@@ -19,6 +23,7 @@ router
   .route("/top-5-cheap")
   .get(tourController.aliasTopTours, tourController.getAllTours);
 // router.param('id' ,tourController.checkId);
+router.route('/tours-withn/:distance/center/:latlng/unit/:unit').get(tourController.getTourWithin) ;
 router
   .route("/")
   .get(tourController.getAllTours)

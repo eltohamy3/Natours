@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable prefer-object-spread */
 /* eslint-disable prettier/prettier */
+const AppError = require("../utils/appError");
 const Tour = require("./../models/tourModel");
 const catchAsync = require("./../utils/catchAsync");
 const factory = require("./handelrFactory");
@@ -20,7 +21,33 @@ exports.aliasTopTours = (req, res, next) => {
   req.query.fields = "name,price,ratingsAverage,summary,difficulty";
   next();
 };
-exports.getTourStats = catchAsync(async (req, res) => {
+
+exports.getTourWithin = catchAsync(async(req, res , next )=>{
+  const { distance , latlng , unit} = req.params ; // all the values are string 
+  const [lat , lng] = latlng.split(','); 
+  if (!lat || !lng) return next(new AppError("Please provide latitude and longitude in the format lat,lng." , 400) , ) ;
+  // radius = distance / radius of the earth 
+  // r earth = 3963.2 in mi and 6378.1 in km 
+  // it now it is in radian
+  const radius = unit ==="mi" ? distance /3963.2 : distance /6378.1
+  const tours = await Tour.find({
+    startLocation : {
+      $geoWithin : {
+        $centerSphere : [[lng , lat] , radius]
+      }
+  
+    }
+  })
+  res.status(200).json({
+    status : "success" , 
+    length : tours.length ,
+    data : {
+      data : tours
+    }
+  })
+
+})
+exports.getTourStats = catchAsync(async (req, res , next) => {
   // stats about tours
   const stats = await Tour.aggregate([
     {
