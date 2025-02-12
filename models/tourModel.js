@@ -174,12 +174,13 @@ tourSchema.pre(/^find/, function (next) {
 });
 // aggregation middleware
 
-tourSchema.pre("aggregate", function (next) {
-  // this.pipeline().match({ secretTour: { $ne: true } });
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-  console.log(this.pipeline());
-  next();
-});
+// tourSchema.pre("aggregate", function (next) {
+//   // this.pipeline().match({ secretTour: { $ne: true } });
+  
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//   console.log(this.pipeline());
+//   next();
+// });
 
 
 

@@ -12,6 +12,8 @@ const router = express.Router();
 router.route("/tour-stats").get(tourController.getTourStats);
 
 
+router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances)
+
 router
   .route("/monthly-plan/:year")
   .get(
