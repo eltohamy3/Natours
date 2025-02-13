@@ -1,83 +1,101 @@
 /* eslint-disable prettier/prettier */
 // core modules
 
+const express = require("express");
+const path = require("path");
+const AppError = require("./utils/appError");
+const globalErrorHandler = require("./controllers/errorController");
 
-const express = require('express');
-const AppError = require('./utils/appError') ;
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
+const mongoSanitize = require("express-mongo-sanitize");
+const xxs = require("xss-clean");
+const hpp = require("hpp");
+
+const morgan = require("morgan");
+
+const userRouter = require("./Routes/userRouters");
+const tourRouter = require("./Routes/tourRouters");
+const reviewRouter = require("./Routes/reviewRouter");
+
 const app = express();
-const globalErrorHandler = require('./controllers/errorController') ;
+app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "views"));
 
-const rateLimit = require('express-rate-limit');
-const helmet = require('helmet') ;
-const mongoSanitize = require('express-mongo-sanitize') ;
-const  xxs = require ('xss-clean') ;
-const hpp = require('hpp') ;
-
-
-const morgan = require('morgan');
-
-const userRouter = require('./Routes/userRouters');
-const tourRouter = require('./Routes/tourRouters');
-const reviewRouter = require ('./Routes/reviewRouter') ;
 
 // 1) GLOBAL Middleware
-// Set Security HTTP header 
+// to allow the static pages to be run on the server
+app.use(express.static(path.join(__dirname ,"public" ) ));
+
+// Set Security HTTP header
 app.use(helmet());
 
-
 // Development logging
-if (process.env.NODE_ENV==='development'){
-  app.use(morgan('dev')); 
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
 }
 
 // Limit requests form same API
 const limiter = rateLimit({
-  max : 100 ,  // for 100 request per hour
-  windoMs : 60 *60 * 1000 ,  // for one hour
-  message:  "Too many requests from this IP , please try again in an hour"
+  max: 100, // for 100 request per hour
+  windoMs: 60 * 60 * 1000, // for one hour
+  message: "Too many requests from this IP , please try again in an hour",
 });
-app.use('/api' , limiter) ;
+app.use("/api", limiter);
 
 // body parser , reading data from body int req.body and limit the size of the body to 10kb
-app.use(express.json({limit : '10kb'})); // to get the data of the body
+app.use(express.json({ limit: "10kb" })); // to get the data of the body
 
 // Data sanitzation against NoSQL query injection
-app.use(mongoSanitize()) ;
+app.use(mongoSanitize());
 
-// Data sanitzation against cross site scripting attaces 
-// clean the body from melicious scrits like html code 
-app.use(xxs()) ;
+// Data sanitzation against cross site scripting attaces
+// clean the body from melicious scrits like html code
+app.use(xxs());
 
 // to prevent the http parameter pollution
-app.use(hpp(
-  {
-    whitelist :['name' , 'slug' , 'maxGroupSize' , 'difficulty' , 'ratingsAverage'  ,'price' ,'priceDiscount']
-  }
-)) ;
-// to allow the static pages to be run on the server
-app.use(express.static(`${__dirname}/public`));
+app.use(
+  hpp({
+    whitelist: [
+      "name",
+      "slug",
+      "maxGroupSize",
+      "difficulty",
+      "ratingsAverage",
+      "price",
+      "priceDiscount",
+    ],
+  }),
+);
 
-// Test middleware 
-app.use((req, res , next) =>{
-  req.requestTime = new Date().toISOString() ;
-  next() ;
-})
+
+// Test middleware
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
+});
+
+app.get('/' , (req , res)=>{
+  res.status(200).render('base' , {
+    tour : "The park Camper  " ,
+    user : "Eltoo"
+  }); 
+});
 
 // 1) tourRouter
 
-app.use('/api/v1/tours', tourRouter);
+app.use("/api/v1/tours", tourRouter);
 // 2) User Routes
-app.use('/api/v1/users', userRouter);
+app.use("/api/v1/users", userRouter);
 
-// 3) Review Router 
-app.use('/api/v1/reviews' , reviewRouter) ;
+// 3) Review Router
+app.use("/api/v1/reviews", reviewRouter);
 // 4) Error handling middleware
 
-app.all('*' , (req , res , next) =>{
-
-  next(new AppError(`Can't find ${req.originalUrl} on this server` , 404));// in this express know that it is an error and then skip all the other middleware and 
+app.all("*", (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server`, 404)); // in this express know that it is an error and then skip all the other middleware and
   // go the the global middleware handler only by pass the error  to the next function
-})  
+});
 // error Handling middleware
-app.use(globalErrorHandler)
+app.use(globalErrorHandler);
 module.exports = app;
