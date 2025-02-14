@@ -17,7 +17,7 @@ const morgan = require("morgan");
 const userRouter = require("./Routes/userRouters");
 const tourRouter = require("./Routes/tourRouters");
 const reviewRouter = require("./Routes/reviewRouter");
-
+const viewRouter = require('./Routes/viewRoutes') ;
 const app = express();
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
@@ -74,16 +74,8 @@ app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
 });
-
-app.get('/' , (req , res)=>{
-  res.status(200).render('base' , {
-    tour : "The park Camper  " ,
-    user : "Eltoo"
-  }); 
-});
-
 // 1) tourRouter
-
+app.use('/', viewRouter);
 app.use("/api/v1/tours", tourRouter);
 // 2) User Routes
 app.use("/api/v1/users", userRouter);
