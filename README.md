@@ -1,7 +1,4 @@
 # Natours API
-
-![Natours Banner](https://your-banner-image-url.com)
-
 ## 🌍 Overview
 Natours is a complete tour booking platform built with **Node.js**, **Express**, **MongoDB**, and **Mongoose**. It follows the **MVC architecture** and features **server-side rendering (SSR) with Pug templates** to deliver a dynamic and fully functional website. 
 
