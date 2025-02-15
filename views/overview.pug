@@ -19,10 +19,10 @@ block content
               span #{tour.startLocation.description}
             .card__data
               svg.card__icon: use( xlink:href='img/icons.svg#icon-calendar')
-              span April 2021
+              span= tour.startDates[0]
             .card__data
               svg.card__icon: use( xlink:href='img/icons.svg#icon-flag')
-              span 3 stops
+              span= `${tour.locations.length}  stops` 
             .card__data
               svg.card__icon: use( xlink:href='img/icons.svg#icon-user')
               span #{tour.maxGroupSize} people
