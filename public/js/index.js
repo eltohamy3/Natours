@@ -1,10 +1,11 @@
-import { login } from "./login";
+import { login ,logout } from "./login";
 import axios from "axios";
 import { initMap } from "./googleMap";
 
 import "@babel/polyfill";
 //Dom element
 const loginForm = document.querySelector(".form");
+const logOutBtn = document.querySelector('.nav__el--logout')
 // values
 // Function to load Google Maps API dynamically
 const loadGoogleMaps = (callback) => {
@@ -33,4 +34,7 @@ if (loginForm) {
     const password = document.getElementById("password").value;
     login(email, password);
   });
+}
+if (logOutBtn){
+  logOutBtn.addEventListener('click' , logout);
 }

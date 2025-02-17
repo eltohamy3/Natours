@@ -103,23 +103,26 @@ exports.protect = catchAsync(async (req, res, next) => {
 });
 exports.isLoggedIn = catchAsync(async (req, res, next) => {
   // distruct the body ;
+  try {
+    if (req.cookies.jwt) {
+      /// 1) verification token
+      const payload = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET,
+      );
 
-  if(req.cookies.jwt) {
-    /// 1) verification token
-    const payload = await promisify(jwt.verify)(
-      req.cookies.jwt,
-      process.env.JWT_SECRET,
-    );
+      // 2) check if user still exists
+      const user = await User.findById(payload.id);
 
-    // 2) check if user still exists
-    const user = await User.findById(payload.id);
+      if (!user) return next();
+      // 3) Check if user changed password after token was issued
+      if (user.CheckPasswordChanged(payload.iat)) return next();
 
-    if (!user) return next();
-    // 3) Check if user changed password after token was issued
-    if (user.CheckPasswordChanged(payload.iat)) return next();
-
-    //  put the user as a locale variable to be accessed by the templet like passing the data to templet 
-    res.locals.user = user;
+      //  put the user as a locale variable to be accessed by the templet like passing the data to templet
+      res.locals.user = user;
+    }
+  } catch (e) {
+    return next();
   }
   next();
 });
@@ -232,6 +235,12 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-exports.logout = (req, res)=>{
-  res.cookie('jwt' ,'LoggedOut')
-}
+exports.logout = (req, res) => {
+  res.cookie("jwt", "LoggedOut", {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({
+    status: "success",
+  });
+};
