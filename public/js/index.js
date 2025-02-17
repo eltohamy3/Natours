@@ -2,10 +2,14 @@ import { login ,logout } from "./login";
 import axios from "axios";
 import { initMap } from "./googleMap";
 
+import { updateUserData } from "./updateSettings";
 import "@babel/polyfill";
 //Dom element
-const loginForm = document.querySelector(".form");
-const logOutBtn = document.querySelector('.nav__el--logout')
+const loginForm = document.querySelector(".form--login");
+const logOutBtn = document.querySelector('.nav__el--logout');
+const updateUserDataForm = document.querySelector(".form-user-data");
+
+
 // values
 // Function to load Google Maps API dynamically
 const loadGoogleMaps = (callback) => {
@@ -34,6 +38,14 @@ if (loginForm) {
     const password = document.getElementById("password").value;
     login(email, password);
   });
+}
+if (updateUserDataForm){
+  updateUserDataForm.addEventListener('submit' , (event) =>{
+    event.preventDefault();
+    const email = document.getElementById("email").value;
+    const name = document.getElementById("name").value;
+    updateUserData(name , email) ;
+  })
 }
 if (logOutBtn){
   logOutBtn.addEventListener('click' , logout);
