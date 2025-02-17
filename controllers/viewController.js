@@ -2,7 +2,7 @@ const catchAsync = require("../utils/catchAsync");
 const axios = require('axios');
 const Tour  = require('./../models/tourModel');
 const ApiLinks = require('./../constant/apiLink'); 
-
+const AppError = require('./../utils/appError'); 
 exports.overview = catchAsync(async (req, res , next) => {
   // const responce = await axios.get(ApiLinks.getAllTour) ;
   // const Tours = responce.data.data.data; 
@@ -22,6 +22,9 @@ exports.tourDetail = catchAsync(async (req, res , next) => {
       select :'rating review user'
      }); 
      console.log(tour) ;
+     if (!tour){
+      return next(new AppError('There is no tour with that name' , 404)) ;
+     }
   // 2 )
   res.status(200).render("tour", {
     title: `${tour.name} Tour`,
@@ -37,3 +40,13 @@ exports.getLoginForm = catchAsync(async (req, res , next) => {
     title: 'Login into your account',
   });
 });
+exports.account =(req, res , next) => {
+  if (res.locals.user){
+    res.status(200).render("account", {
+      title: 'Your account',
+    });
+  }else{
+    res.redirect('/login');
+  }
+
+};

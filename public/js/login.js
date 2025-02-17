@@ -30,11 +30,12 @@ export const logout = async ()=>{
   try{
     const res = await axios.get(ApiLinks.logout);
     if (res.data.status ==='success'){
-      location.reload(true)
+      window.location.reload(true)
+      window.location.assign("/");
     }
   }catch(err){
     showAlert("error", 'Error logging out! Try again.');
-    
+
   }
 
 }

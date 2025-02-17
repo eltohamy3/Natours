@@ -8,5 +8,6 @@ router.use(authController.isLoggedIn);
 router.get('/' , viewController.overview);
 router.get('/tour/:tourSlug' ,viewController.tourDetail) ;
 router.get('/login' ,viewController.getLoginForm) ;
+router.get('/me' ,viewController.account) ;
 
 module.exports = router;
