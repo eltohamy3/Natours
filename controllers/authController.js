@@ -10,18 +10,20 @@ const sendEmail = require("./../utils/email");
 const createSendToken = (user, statusCode, res) => {
   const token = user.generateAuthToken();
   const cookieOptions = {
-    expires: new Date(Date.now() + (process.env.JWT_COOKIE_ECPIRES_IN * 24 *60 *60 *1000)) , 
-    httpOnly:true // allow access the cookie only by http 
-  } ;
-  if (process.env.NODE_ENV ==='production'){
-    cookieOptions.secure = true ;
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_ECPIRES_IN * 24 * 60 * 60 * 1000,
+    ),
+    httpOnly: true, // allow access the cookie only by http
+  };
+  if (process.env.NODE_ENV === "production") {
+    cookieOptions.secure = true;
   }
 
   // remove the password from the output
-  user.password= undefined; 
-  user.active = undefined
-  // convert it to the ms 
-  res.cookie('jwt' ,token , cookieOptions);
+  user.password = undefined;
+  user.active = undefined;
+  // convert it to the ms
+  res.cookie("jwt", token, cookieOptions);
   res.status(statusCode).json({
     status: "success",
     token: token,
@@ -50,7 +52,8 @@ exports.login = catchAsync(async (req, res, next) => {
   const user = await User.findOne({
     email: email,
   }).select("+password");
-
+  console.log(user);
+  console.log(password);
   if (!user || !(await user.ComparePassword(password, user.password))) {
     return next(new AppError("email or password is  incorrect", 401));
   }
@@ -65,6 +68,8 @@ exports.protect = catchAsync(async (req, res, next) => {
   let token;
   if (authHeader && authHeader.startsWith("Bearer ")) {
     token = authHeader.split(" ")[1];
+  } else if (req.cookie.jwt) {
+    token = req.cookie.jwt;
   }
 
   if (!token) {
@@ -94,6 +99,28 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   //  GRANt access the protected route
   req.user = user;
+  next();
+});
+exports.isLoggedIn = catchAsync(async (req, res, next) => {
+  // distruct the body ;
+
+  if(req.cookies.jwt) {
+    /// 1) verification token
+    const payload = await promisify(jwt.verify)(
+      req.cookies.jwt,
+      process.env.JWT_SECRET,
+    );
+
+    // 2) check if user still exists
+    const user = await User.findById(payload.id);
+
+    if (!user) return next();
+    // 3) Check if user changed password after token was issued
+    if (user.CheckPasswordChanged(payload.iat)) return next();
+
+    //  put the user as a locale variable to be accessed by the templet like passing the data to templet 
+    res.locals.user = user;
+  }
   next();
 });
 
@@ -190,7 +217,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 exports.updatePassword = catchAsync(async (req, res, next) => {
   //1-) get the user from collection
   const user = await User.findById(req.user._id).select("+password");
-  console.log(user); 
+  console.log(user);
   //2) check if posted current password is correct
   /// hear we already have a user so no need to check for it
   if (!(await user.ComparePassword(req.body.oldPassword, user.password)))
@@ -204,3 +231,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // 4) log user in , send JWT
   createSendToken(user, 200, res);
 });
+
+exports.logout = (req, res)=>{
+  res.cookie('jwt' ,'LoggedOut')
+}

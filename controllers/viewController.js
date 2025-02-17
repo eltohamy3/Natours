@@ -24,7 +24,16 @@ exports.tourDetail = catchAsync(async (req, res , next) => {
      console.log(tour) ;
   // 2 )
   res.status(200).render("tour", {
-    title: `${tour.name}`,
+    title: `${tour.name} Tour`,
      tour
+  });
+});
+
+exports.getLoginForm = catchAsync(async (req, res , next) => {
+  if (res.locals.user){
+    res.redirect('/'); // Redirect to the home page
+  }
+  res.status(200).render("login", {
+    title: 'Login into your account',
   });
 });

@@ -13,7 +13,7 @@ const xxs = require("xss-clean");
 const hpp = require("hpp");
 
 const morgan = require("morgan");
-
+const cookieParser = require('cookie-parser');
 const userRouter = require("./Routes/userRouters");
 const tourRouter = require("./Routes/tourRouters");
 const reviewRouter = require("./Routes/reviewRouter");
@@ -45,7 +45,8 @@ app.use("/api", limiter);
 
 // body parser , reading data from body int req.body and limit the size of the body to 10kb
 app.use(express.json({ limit: "10kb" })); // to get the data of the body
-
+// to access the  cookie body
+app.use(cookieParser());
 // Data sanitzation against NoSQL query injection
 app.use(mongoSanitize());
 
@@ -69,10 +70,43 @@ app.use(
   
 );
 
+// Adjust Content Security Policy (CSP) to allow Google Maps
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"], // Allow resources from the same origin
+      scriptSrc: [
+        "'self'",
+        "https://maps.googleapis.com",  // Allow Google Maps scripts
+        "https://fonts.googleapis.com", // Allow Google Fonts
+        "https://cdnjs.cloudflare.com"
+      ], 
+      connectSrc: [
+        "'self'", 
+        "https://maps.googleapis.com", // Allow Google Maps API calls
+        "ws://127.0.0.1:*" // ✅ Allow WebSocket connections (Parcel HMR)
+      ],
+      styleSrc: [
+        "'self'", 
+        "'unsafe-inline'",  // Allow inline styles
+        "https://fonts.googleapis.com"  // Allow Google Fonts
+      ],
+      imgSrc: [
+        "'self'", 
+        "data:", 
+        "https://maps.googleapis.com",  // Allow images from Google Maps
+        "https://maps.gstatic.com"  // Allow images from Google Maps
+      ],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"], // Allow fonts from Google Fonts
+    },
+  })
+);
+
 
 // Test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  console.log(req.cookies) ;
   next();
 });
 // 1) tourRouter
