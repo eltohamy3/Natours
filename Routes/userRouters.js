@@ -1,8 +1,8 @@
 const express = require("express");
-
 const userController = require("./../controllers/userController");
 const authController = require("./../controllers/authController");
 const router = express.Router();
+
 
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);
@@ -23,7 +23,7 @@ router.route("/updateMyPassword").patch(authController.updatePassword); //
 
 //----------------update Data-------------------------------
 
-router.route("/updateMe").patch(userController.updateMe); //
+router.route("/updateMe").patch(userController.uploadUserPhoto ,userController.updateMe); //
 // router.patch('/resetPassword/:token' , authController.resetPassword) ;
 router.get("/me", userController.addUserId, userController.getMe);
 

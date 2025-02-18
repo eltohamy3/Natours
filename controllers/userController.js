@@ -3,6 +3,9 @@ const catchAsync = require("./../utils/catchAsync");
 const User = require("./../models/userModel");
 const AppError = require("./../utils/appError");
 const factory = require ('./handelrFactory') ;
+const upload = require ('../utils/imageUpload') ;
+const fs = require('fs'); 
+const path = require("path");
 
 const filterObj = (obj, ...allowedFields) => {
   let newObj = {};
@@ -38,16 +41,32 @@ exports.updateMe = catchAsync(async (req, res, next) => {
         400,
       ),
     );
+    console.log(req.file) ;
 
   /// 2 UPDATE THE  user document
+
   console.log(req.body);
   const updatedObject = filterObj(req.body, "name", "email");
   console.log(updatedObject);
+  if (req.file){
+    updatedObject.photo = req.file.filename; 
+    
+  }
   const updatedUser = await User.findByIdAndUpdate(req.user.id, updatedObject, {
     new: true,
     runValidators: true,
   });
-
+  // if it saved successfuly then we will remove the old user the old user phot from the database
+  if (req.file){
+    // remove the update photo from the database
+    if (req.user.photo !== 'default'){ // if not the first time
+      const oldPhotoPath = path.normalize(path.join(__dirname , '../', "public", "img", "users", req.user.photo));
+      console.log( `oldphotoPath : ${oldPhotoPath}`) ;
+      if (fs.existsSync(oldPhotoPath)) {
+        fs.unlinkSync(oldPhotoPath); // Delete old photo
+      }
+    }
+  }
   res.status(200).json({
     status: "success",
     data: {
@@ -66,3 +85,4 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.uploadUserPhoto = upload.single('photo');  // only single image for the user photo
