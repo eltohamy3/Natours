@@ -2,13 +2,13 @@ import { login ,logout } from "./login";
 import axios from "axios";
 import { initMap } from "./googleMap";
 
-import { updateUserData } from "./updateSettings";
+import { updateSettings } from "./updateSettings";
 import "@babel/polyfill";
 //Dom element
 const loginForm = document.querySelector(".form--login");
 const logOutBtn = document.querySelector('.nav__el--logout');
 const updateUserDataForm = document.querySelector(".form-user-data");
-
+const updatePasswordForm = document.querySelector('.form-user-settings') ;
 
 // values
 // Function to load Google Maps API dynamically
@@ -44,8 +44,38 @@ if (updateUserDataForm){
     event.preventDefault();
     const email = document.getElementById("email").value;
     const name = document.getElementById("name").value;
-    updateUserData(name , email) ;
+    updateSettings({name , email} , 'data') ;
   })
+}
+/*
+  if (!(await user.ComparePassword(req.body.oldPassword, user.password)))
+    return next(new AppError("your password is incorrect"), 401);
+
+  3) if so , update psassword
+  user.password = req.body.newPassword;
+  user.confirmPassword = req.body.newConfirmPassword;
+  await user.save();
+
+*/
+if (updatePasswordForm){
+  updatePasswordForm.addEventListener('submit' , async(event) =>{
+    event.preventDefault();
+    document.querySelector('.btn--save-password').textContent = 'Updating...'
+    const oldPassword = document.getElementById("password-current").value;
+    const newPassword = document.getElementById("password").value;
+    const newConfirmPassword = document.getElementById("password-confirm").value;
+
+    await updateSettings({oldPassword , newPassword ,newConfirmPassword} , 'password') ;
+
+    document.querySelector('.btn--save-password').textContent = 'Save password'
+
+    // clear the fields
+
+    document.getElementById("password-current").value ='' ;
+    document.getElementById("password").value='' ;
+    document.getElementById("password-confirm").value='';
+  })
+
 }
 if (logOutBtn){
   logOutBtn.addEventListener('click' , logout);

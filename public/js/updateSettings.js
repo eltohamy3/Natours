@@ -1,20 +1,20 @@
 import axios from "axios";
 import ApiLinks from "./../../constant/apiLink";
-import AppError from "../../utils/appError";
 import { showAlert } from "./alerts";
 
-export const updateUserData = async (name, email) => {
+export const updateSettings = async (data, type) => {
   try {
-    const res = await axios.patch(ApiLinks.updateUserData, {
-      name,
-      email,
-    });
+    type = type.toLowerCase() ;
+    
+    const res = await axios.patch( type ==='password'? ApiLinks.updateUserPassword : ApiLinks.updateUserData, data);
+
     console.log(res) ;
     if (res.data.status ==='success'){
-      showAlert("success", "Data Updated Successfuly");
+      showAlert("success", `${type =='password' ?"Password" : "Data"} Updated Successfuly`);
+
     }else{
       const errorMessage =
-      res.message || "Update your data failed. Try again.";
+      res.message || `Update your ${type =='password' ?"Password" : "Data"} failed. Try again.`;
       showAlert("error" , errorMessage);
     }
   } catch (err) {
@@ -22,7 +22,7 @@ export const updateUserData = async (name, email) => {
 
     // Ensure 'err.response' and 'err.response.data' exist before accessing properties
     const errorMessage =
-      err.response?.data?.message || "Update your data failed. Try again.";
+    res.message || `Update your ${type=='password' ?"Password" : "Data"} failed. Try again.`;
     showAlert("error", errorMessage);
   }
 };
