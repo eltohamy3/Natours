@@ -90,18 +90,18 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 
 exports.uploadUserPhoto = upload.single("photo"); // only single image for the user photo
 
-exports.resizeImage = (req, res, next) => {
+exports.resizeImage = catchAsync( async (req, res, next) => {
   console.log(req.file) ;
   if (!req.file) return next();
   console.log('hear') ;
   req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
 
   // since the file is stored on the memory it call by req.file.buffer
-  sharp(req.file.buffer)
+  await sharp(req.file.buffer)
     .resize(500, 500) // resize the image to square
     .toFormat("jpeg") // convert the image to jpeg format 
     .jpeg({ quality: 90 }) // reduce the quality to 90%
     .toFile(`public/img/users/${req.file.filename}`);  //store the image  
 
     next() ;
-};
+});

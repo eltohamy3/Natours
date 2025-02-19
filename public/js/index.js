@@ -1,4 +1,4 @@
-import { login ,logout } from "./login";
+import { login, logout } from "./login";
 import axios from "axios";
 import { initMap } from "./googleMap";
 
@@ -6,9 +6,9 @@ import { updateSettings } from "./updateSettings";
 import "@babel/polyfill";
 //Dom element
 const loginForm = document.querySelector(".form--login");
-const logOutBtn = document.querySelector('.nav__el--logout');
+const logOutBtn = document.querySelector(".nav__el--logout");
 const updateUserDataForm = document.querySelector(".form-user-data");
-const updatePasswordForm = document.querySelector('.form-user-settings') ;
+const updatePasswordForm = document.querySelector(".form-user-settings");
 
 // values
 // Function to load Google Maps API dynamically
@@ -17,7 +17,9 @@ const loadGoogleMaps = (callback) => {
 
   const script = document.createElement("script");
   script.id = "google-maps-script";
-  script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyCP5dKuUn6JY65QB2pVF_oqDm2uqQGL_T0&callback=" + callback;
+  script.src =
+    "https://maps.googleapis.com/maps/api/js?key=AIzaSyCP5dKuUn6JY65QB2pVF_oqDm2uqQGL_T0&callback=" +
+    callback;
   script.async = true;
   script.defer = true;
 
@@ -39,19 +41,18 @@ if (loginForm) {
     login(email, password);
   });
 }
-if (updateUserDataForm){
-  updateUserDataForm.addEventListener('submit' , (event) =>{
+if (updateUserDataForm) {
+  updateUserDataForm.addEventListener("submit", (event) => {
     event.preventDefault();
     const email = document.getElementById("email").value;
     const name = document.getElementById("name").value;
-    const photo = document.getElementById('photo').files[0] ;
-    const form = new FormData(); 
-    form.append('name' , name) ;
-    form.append('email' , email) ;
-    form.append('photo' , photo) ;
-    updateSettings(form , 'data') ;
-    
-  })
+    const photo = document.getElementById("photo").files[0];
+    const form = new FormData();
+    form.append("name", name);
+    form.append("email", email);
+    form.append("photo", photo);
+    updateSettings(form, "data");
+  });
 }
 /*
   if (!(await user.ComparePassword(req.body.oldPassword, user.password)))
@@ -63,26 +64,29 @@ if (updateUserDataForm){
   await user.save();
 
 */
-if (updatePasswordForm){
-  updatePasswordForm.addEventListener('submit' , async(event) =>{
+if (updatePasswordForm) {
+  updatePasswordForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    document.querySelector('.btn--save-password').textContent = 'Updating...'
+    document.querySelector(".btn--save-password").textContent = "Updating...";
     const oldPassword = document.getElementById("password-current").value;
     const newPassword = document.getElementById("password").value;
-    const newConfirmPassword = document.getElementById("password-confirm").value;
+    const newConfirmPassword =
+      document.getElementById("password-confirm").value;
 
-    await updateSettings({oldPassword , newPassword ,newConfirmPassword} , 'password') ;
+    await updateSettings(
+      { oldPassword, newPassword, newConfirmPassword },
+      "password",
+    );
 
-    document.querySelector('.btn--save-password').textContent = 'Save password'
+    document.querySelector(".btn--save-password").textContent = "Save password";
 
     // clear the fields
 
-    document.getElementById("password-current").value ='' ;
-    document.getElementById("password").value='' ;
-    document.getElementById("password-confirm").value='';
-  })
-
+    document.getElementById("password-current").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("password-confirm").value = "";
+  });
 }
-if (logOutBtn){
-  logOutBtn.addEventListener('click' , logout);
+if (logOutBtn) {
+  logOutBtn.addEventListener("click", logout);
 }
