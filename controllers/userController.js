@@ -2,9 +2,10 @@
 const catchAsync = require("./../utils/catchAsync");
 const User = require("./../models/userModel");
 const AppError = require("./../utils/appError");
-const factory = require ('./handelrFactory') ;
-const upload = require ('../utils/imageUpload') ;
-const fs = require('fs'); 
+const factory = require("./handelrFactory");
+const upload = require("../utils/imageUpload");
+const fs = require("fs");
+const sharp = require("sharp");
 const path = require("path");
 
 const filterObj = (obj, ...allowedFields) => {
@@ -16,21 +17,21 @@ const filterObj = (obj, ...allowedFields) => {
   });
   return newObj;
 };
-exports.addUserId = (req ,res , next)=>{
-  req.params.id =   req.user.id; 
-  next() ;
-}
-exports.getMe = factory.getOne(User) ;
-exports.getAllUsers = factory.getAll(User) ;
+exports.addUserId = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
+exports.getMe = factory.getOne(User);
+exports.getAllUsers = factory.getAll(User);
 
-exports.CreateUser = factory.CreatOne(User)
+exports.CreateUser = factory.CreatOne(User);
 
-exports.getUser = factory.getOne(User) ;
+exports.getUser = factory.getOne(User);
 // Update user by ID
-// do not update the password with this 
+// do not update the password with this
 
-exports.UpdateUser = factory.UpdateOne(User) ;
-exports.DeleteUser =factory.deleteOne(User) ;
+exports.UpdateUser = factory.UpdateOne(User);
+exports.DeleteUser = factory.deleteOne(User);
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1) throw error if tuser posts password data
@@ -41,27 +42,29 @@ exports.updateMe = catchAsync(async (req, res, next) => {
         400,
       ),
     );
-    console.log(req.file) ;
+  console.log(req.file);
 
   /// 2 UPDATE THE  user document
 
   console.log(req.body);
   const updatedObject = filterObj(req.body, "name", "email");
   console.log(updatedObject);
-  if (req.file){
-    updatedObject.photo = req.file.filename; 
-    
+  if (req.file) {
+    updatedObject.photo = req.file.filename;
   }
   const updatedUser = await User.findByIdAndUpdate(req.user.id, updatedObject, {
     new: true,
     runValidators: true,
   });
   // if it saved successfuly then we will remove the old user the old user phot from the database
-  if (req.file){
+  if (req.file) {
     // remove the update photo from the database
-    if (req.user.photo !== 'default'){ // if not the first time
-      const oldPhotoPath = path.normalize(path.join(__dirname , '../', "public", "img", "users", req.user.photo));
-      console.log( `oldphotoPath : ${oldPhotoPath}`) ;
+    if (req.user.photo !== "default") {
+      // if not the first time
+      const oldPhotoPath = path.normalize(
+        path.join(__dirname, "../", "public", "img", "users", req.user.photo),
+      );
+      console.log(`oldphotoPath : ${oldPhotoPath}`);
       if (fs.existsSync(oldPhotoPath)) {
         fs.unlinkSync(oldPhotoPath); // Delete old photo
       }
@@ -85,4 +88,20 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.uploadUserPhoto = upload.single('photo');  // only single image for the user photo
+exports.uploadUserPhoto = upload.single("photo"); // only single image for the user photo
+
+exports.resizeImage = (req, res, next) => {
+  console.log(req.file) ;
+  if (!req.file) return next();
+  console.log('hear') ;
+  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+
+  // since the file is stored on the memory it call by req.file.buffer
+  sharp(req.file.buffer)
+    .resize(500, 500) // resize the image to square
+    .toFormat("jpeg") // convert the image to jpeg format 
+    .jpeg({ quality: 90 }) // reduce the quality to 90%
+    .toFile(`public/img/users/${req.file.filename}`);  //store the image  
+
+    next() ;
+};

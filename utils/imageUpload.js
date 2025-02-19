@@ -1,21 +1,24 @@
 const multer = require("multer");
 
-const multerStorage = multer.diskStorage({
-  destination :  (req , file , cb)=>{
-    cb(null  , 'public/img/users') ;// select the path to upload the file in it
-  } ,
-  filename: (req, file ,cb)=>{
-    // this is some way to store the name of the image
-    // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9) ;
+// const multerStorage = multer.diskStorage({
+//   destination :  (req , file , cb)=>{
+//     cb(null  , 'public/img/users') ;// select the path to upload the file in it
+//   } ,
+//   filename: (req, file ,cb)=>{
+//     // this is some way to store the name of the image
+//     // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9) ;
     
-    // cb(null, file.fieldname + '-' + uniqueSuffix)
-    // this is other user-userid-currentTimeStamb.extention
-    // user-43r4nmmn554kfjdjf5-858573495748.jpeg
-    const ext = file.mimetype.split('/')[1] ; // it like image/jpeg
-    cb(null , `user-${req.user.id}-${Date.now()}.${ext}`) ;
+//     // cb(null, file.fieldname + '-' + uniqueSuffix)
+//     // this is other user-userid-currentTimeStamb.extention
+//     // user-43r4nmmn554kfjdjf5-858573495748.jpeg
+//     const ext = file.mimetype.split('/')[1] ; // it like image/jpeg
+//     cb(null , `user-${req.user.id}-${Date.now()}.${ext}`) ;
 
-  }
-});
+//   }
+// });
+
+
+const multerStorage = multer.memoryStorage(); // store the image as a buffer
 
 const multerFilter = (req,file , cb)=>{
   if (file.mimetype.startsWith('image')){
