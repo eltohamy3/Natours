@@ -12005,6 +12005,9 @@ var updateSettings = exports.updateSettings = /*#__PURE__*/function () {
           console.log(_res);
           if (_res.data.status === 'success') {
             (0, _alerts.showAlert)("success", "".concat(type == 'password' ? "Password" : "Data", " Updated Successfuly"));
+            window.setTimeout(function () {
+              window.location.reload(true);
+            }, 3000);
           } else {
             errorMessage = _res.message || "Update your ".concat(type == 'password' ? "Password" : "Data", " failed. Try again.");
             (0, _alerts.showAlert)("error", errorMessage);
@@ -12973,10 +12976,12 @@ if (updateUserDataForm) {
     event.preventDefault();
     var email = document.getElementById("email").value;
     var name = document.getElementById("name").value;
-    (0, _updateSettings.updateSettings)({
-      name: name,
-      email: email
-    }, 'data');
+    var photo = document.getElementById('photo').files[0];
+    var form = new FormData();
+    form.append('name', name);
+    form.append('email', email);
+    form.append('photo', photo);
+    (0, _updateSettings.updateSettings)(form, 'data');
   });
 }
 /*
@@ -13054,7 +13059,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51566" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58177" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

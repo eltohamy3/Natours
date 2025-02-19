@@ -11,6 +11,9 @@ export const updateSettings = async (data, type) => {
     console.log(res) ;
     if (res.data.status ==='success'){
       showAlert("success", `${type =='password' ?"Password" : "Data"} Updated Successfuly`);
+      window.setTimeout( ()=>{
+        window.location.reload(true);
+      } , 3000) ;
 
     }else{
       const errorMessage =

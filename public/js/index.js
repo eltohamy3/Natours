@@ -44,7 +44,13 @@ if (updateUserDataForm){
     event.preventDefault();
     const email = document.getElementById("email").value;
     const name = document.getElementById("name").value;
-    updateSettings({name , email} , 'data') ;
+    const photo = document.getElementById('photo').files[0] ;
+    const form = new FormData(); 
+    form.append('name' , name) ;
+    form.append('email' , email) ;
+    form.append('photo' , photo) ;
+    updateSettings(form , 'data') ;
+    
   })
 }
 /*
