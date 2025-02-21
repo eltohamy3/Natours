@@ -1,7 +1,7 @@
 import { login, logout } from "./login";
-import axios from "axios";
 import { initMap } from "./googleMap";
 
+import {bookTour} from './stripe'
 import { updateSettings } from "./updateSettings";
 import "@babel/polyfill";
 //Dom element
@@ -10,6 +10,7 @@ const logOutBtn = document.querySelector(".nav__el--logout");
 const updateUserDataForm = document.querySelector(".form-user-data");
 const updatePasswordForm = document.querySelector(".form-user-settings");
 
+const BookingNowBtn = document.getElementById('book-tour');
 // values
 // Function to load Google Maps API dynamically
 const loadGoogleMaps = (callback) => {
@@ -25,6 +26,7 @@ const loadGoogleMaps = (callback) => {
 
   document.body.appendChild(script);
 };
+
 // Load Google Maps only if #map exists
 document.addEventListener("DOMContentLoaded", () => {
   if (document.getElementById("map")) {
@@ -41,6 +43,7 @@ if (loginForm) {
     login(email, password);
   });
 }
+
 if (updateUserDataForm) {
   updateUserDataForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -89,4 +92,15 @@ if (updatePasswordForm) {
 }
 if (logOutBtn) {
   logOutBtn.addEventListener("click", logout);
+}
+if (BookingNowBtn){
+
+  
+  BookingNowBtn.addEventListener("click", async event=>{
+    event.target.textContent = 'Processing...';
+    const tourId = event.target.dataset.tourId;
+    await bookTour(tourId);
+  }  ); // 
+
+
 }

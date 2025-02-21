@@ -81,7 +81,8 @@ app.use(
         "'self'",
         "https://maps.googleapis.com",  // Allow Google Maps scripts
         "https://fonts.googleapis.com", // Allow Google Fonts
-        "https://cdnjs.cloudflare.com"
+        "https://cdnjs.cloudflare.com" ,
+        "https://js.stripe.com"  // Add Stripe's URL
       ], 
       connectSrc: [
         "'self'", 
@@ -100,6 +101,8 @@ app.use(
         "https://maps.gstatic.com"  // Allow images from Google Maps
       ],
       fontSrc: ["'self'", "https://fonts.gstatic.com"], // Allow fonts from Google Fonts
+      frameSrc: ["'self'", "https://js.stripe.com"],  // Allow Stripe iframe
+
     },
   })
 );
