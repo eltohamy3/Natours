@@ -17,6 +17,8 @@ const cookieParser = require('cookie-parser');
 const userRouter = require("./Routes/userRouters");
 const tourRouter = require("./Routes/tourRouters");
 const reviewRouter = require("./Routes/reviewRouter");
+const bookingRouter = require("./Routes/bookingRouter");
+
 const viewRouter = require('./Routes/viewRoutes') ;
 const app = express();
 app.set("view engine", "pug");
@@ -109,6 +111,7 @@ app.use((req, res, next) => {
   // console.log(req.cookies) ;
   next();
 });
+
 // 1) tourRouter
 app.use('/', viewRouter);
 app.use("/api/v1/tours", tourRouter);
@@ -117,7 +120,10 @@ app.use("/api/v1/users", userRouter);
 
 // 3) Review Router
 app.use("/api/v1/reviews", reviewRouter);
-// 4) Error handling middleware
+// 4) booking Router
+app.use("/api/v1/bookings", bookingRouter);
+
+// 5) Error handling middleware
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404)); // in this express know that it is an error and then skip all the other middleware and

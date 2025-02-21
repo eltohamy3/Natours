@@ -1,9 +1,8 @@
 const nodemailer = require("nodemailer");
-const pug = require('pug'); 
-const  path  = require("path");
+const pug = require("pug");
+const path = require("path");
 
-const htmlToText= require('html-to-text');
-
+const htmlToText = require("html-to-text");
 
 module.exports = class Email {
   constructor(user, url) {
@@ -25,13 +24,16 @@ module.exports = class Email {
       },
     });
   }
- async send(template , subject){
+  async send(template, subject) {
     // 1) Render HTML based on a pug template
-    const html = pug.renderFile(path.join(__dirname , '../' , 'views' , 'email' , `${template}.pug`) , {
-      firstName : this.firstName , 
-      url : this.url , 
-      subject 
-    })
+    const html = pug.renderFile(
+      path.join(__dirname, "../", "views", "email", `${template}.pug`),
+      {
+        firstName: this.firstName,
+        url: this.url,
+        subject,
+      },
+    );
 
     // 2 ) Define email options
 
@@ -39,17 +41,18 @@ module.exports = class Email {
       from: this.from,
       to: this.to,
       subject: subject,
-      text: htmlToText.fromString(html),
-      html
+      text: htmlToText.convert(html),
+      html,
     };
-  
+
     // 3) Create transport and send email
-    await this.newTransport().sendMail(mailOptions); 
+    await this.newTransport().sendMail(mailOptions);
   }
- async sendWelcome(){
-   await  this.send('welcome' , 'Welcome to the Natours Family!');
-   // becouse send return promise
+  async sendWelcome() {
+    await this.send("welcome", "Welcome to the Natours Family!");
+    // becouse send return promise
   }
-  sendReset
+ async  sendPasswordReset(){
+  await this.send('passwordReset' , 'Your Password reset token (valid for only 10 minuits)');
+  }
 };
-module.exports = sendEmail;

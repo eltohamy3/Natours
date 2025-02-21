@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
 const crypto = require("crypto");
 
-const sendEmail = require("./../utils/email");
+const Email = require("./../utils/email");
 
 const createSendToken = (user, statusCode, res) => {
   const token = user.generateAuthToken();
@@ -39,7 +39,13 @@ exports.signup = catchAsync(async (req, res, next) => {
     confirmPassword: req.body.confirmPassword,
     email: req.body.email,
   });
+
+  const url = `${req.protocol}://${req.get('host')}/me` ; // to go to the profile page
+  console.log(url) ;
+  await new Email(newUser , url).sendWelcome() ;
   createSendToken(newUser, 201, res);
+
+
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -157,20 +163,9 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   // 4) Send email with reset link
-  const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}`;
-  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: 
-  ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
-  const options = {
-    email: user.email,
-    subject: "Your password reset token (valid for 10 min)",
-    message: message,
-  };
-  console.log(options);
-
   try {
-    console.log("heare befor sending ");
-    await sendEmail(options);
-    console.log("heare after sending ");
+    const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}`;
+    await new Email(user , resetURL).sendPasswordReset();
     res.status(200).json({
       status: "success",
       message: "Token sent to email!",
@@ -179,7 +174,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
-
+    console.log(err) ;  
     return next(
       new AppError(
         "There was an error while sending the email. Try again later!",

@@ -184,9 +184,9 @@ exports.resizeTourImages = catchAsync(async (req, res, next) => {
       .toFile(`public/img/tours/${Filename}`); //store the image
     // store the name of the image to body to be updated in the database
     req.body.images.push(Filename) ;
-    
   })
 ) ;
+
   next();
 });
 exports.uploadTourImages = upload.fields([
