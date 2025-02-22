@@ -2,7 +2,7 @@ const catchAsync = require("./../utils/catchAsync");
 const AppError = require("../utils/appError");
 const Tour = require("./../models/tourModel");
 const factory = require("./handelrFactory");
-
+const Booking = require('./../models/bookingModel');
 const dotenv = require("dotenv");
 dotenv.config({ path: "./config.env" }); // ✅ Load .env before anything else
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -14,7 +14,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   // 2) Create checkout session
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
-    success_url: `${req.protocol}://${req.get("host")}/`,
+    success_url: `${req.protocol}://${req.get("host")}/?tour=${tour.id}&user=${req.user.id}&price=${tour.price}`,
     cancel_url: `${req.protocol}://${req.get("host")}/tour/${tour.slug}`,
     customer_email: req.user.email,
     client_reference_id: tour.id,
@@ -40,7 +40,23 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     session,
   });
 });
+exports.creatBookingCheckout = catchAsync (async (req, res, next)=>{
 
+  // not secure 
+  const {tour , user ,price} = req.query ;
+
+  if (!tour || !user || !price) return next() ;
+
+  // all is true 
+  await Booking.create({tour , price , user}) ;
+
+  res.redirect(req.originalUrl.split('?')[0]); // redirect the application to the rout without the query string 
+
+
+
+  
+
+}) ;
 // // console.log('Stripe API Key:', process.env.STRIPE_SECRET_KEY);
 
 // const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
