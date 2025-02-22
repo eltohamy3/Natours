@@ -52,11 +52,23 @@ exports.creatBookingCheckout = catchAsync (async (req, res, next)=>{
 
   res.redirect(req.originalUrl.split('?')[0]); // redirect the application to the rout without the query string 
 
-
-
-  
-
 }) ;
+
+
+
+
+exports.createBooking = factory.CreatOne(Booking);
+
+
+exports.deleteBooking = factory.deleteOne(Booking);
+
+exports.getBooking = factory.getOne(Booking);
+exports.getAllBooking = factory.getAll(Booking);
+
+exports.updateBooking = factory.UpdateOne(Booking);
+
+
+
 // // console.log('Stripe API Key:', process.env.STRIPE_SECRET_KEY);
 
 // const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
