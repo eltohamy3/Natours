@@ -1,8 +1,7 @@
 const catchAsync = require("../utils/catchAsync");
-const axios = require('axios');
 const Tour  = require('./../models/tourModel');
-const ApiLinks = require('./../constant/apiLink'); 
 const AppError = require('./../utils/appError'); 
+const Booking = require("./../models/bookingModel");
 exports.overview = catchAsync(async (req, res , next) => {
   // const responce = await axios.get(ApiLinks.getAllTour) ;
   // const Tours = responce.data.data.data; 
@@ -48,5 +47,28 @@ exports.account =(req, res , next) => {
   }else{
     res.redirect('/login');
   }
-
 };
+exports.getMyTours = catchAsync(async (req, res, next)=>{
+  console.log("Heare in the get My TOurs"); 
+  // 1 ) find all bookings 
+
+  // 2 ) find tours with the returnd IDs
+  const bookings = await Booking.find({
+    user: req.user.id
+  }) ;
+
+  const tourIDs = bookings.map(el => el.tour) ;
+
+  const tours = await Tour.find({_id:{ $in : tourIDs}});
+  res.status(200).render('overview' , {
+    title : "My Tours" ,
+    tours
+  });
+// res.status(200).json({
+//   status : 'success' ,
+//   data : {
+//     data : bookings
+//   }
+// });
+
+});

@@ -9,5 +9,7 @@ router.get('/' ,bookingController.creatBookingCheckout , viewController.overview
 router.get('/tour/:tourSlug' ,viewController.tourDetail) ;
 router.get('/login' ,viewController.getLoginForm) ;
 router.get('/me' ,viewController.account) ;
+router.get('/my-tours' ,authController.protect , viewController.getMyTours) ;
+
 
 module.exports = router;
