@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 // const slugify = require("slugify");
 const Tour = require("./tourModel");
+
 const reviewSchema = mongoose.Schema(
   {
     user: {
