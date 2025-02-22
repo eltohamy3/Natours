@@ -39,6 +39,13 @@ exports.getLoginForm = catchAsync(async (req, res , next) => {
     title: 'Login into your account',
   });
 });
+exports.getSignupForm = catchAsync(async (req, res , next) => {
+  if (res.locals.user){
+    res.redirect('/'); // Redirect to the home page
+  }
+  res.status(200).render("signup", {title: 'Create a new Account '});
+
+});
 exports.account =(req, res , next) => {
   if (res.locals.user){
     res.status(200).render("account", {
@@ -48,11 +55,13 @@ exports.account =(req, res , next) => {
     res.redirect('/login');
   }
 };
+
 exports.getMyTours = catchAsync(async (req, res, next)=>{
   console.log("Heare in the get My TOurs"); 
   // 1 ) find all bookings 
 
   // 2 ) find tours with the returnd IDs
+
   const bookings = await Booking.find({
     user: req.user.id
   }) ;

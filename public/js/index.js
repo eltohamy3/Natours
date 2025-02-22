@@ -1,4 +1,4 @@
-import { login, logout } from "./login";
+import { loginOrSingup, logout } from "./login";
 import { initMap } from "./googleMap";
 
 import {bookTour} from './stripe'
@@ -6,6 +6,8 @@ import { updateSettings } from "./updateSettings";
 import "@babel/polyfill";
 //Dom element
 const loginForm = document.querySelector(".form--login");
+const signupForm = document.querySelector(".form--signup");
+
 const logOutBtn = document.querySelector(".nav__el--logout");
 const updateUserDataForm = document.querySelector(".form-user-data");
 const updatePasswordForm = document.querySelector(".form-user-settings");
@@ -41,10 +43,20 @@ if (loginForm) {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
     console.log(`email : ${email} , Password : ${password}`);
-    login(email, password);
+    loginOrSingup({email, password}, 'login');
   });
 }
+if (signupForm){
+  signupForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const name = document.getElementById("name").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
 
+    loginOrSingup({email, password , name , confirmPassword}, 'signup');
+  });
+}
 if (updateUserDataForm) {
   updateUserDataForm.addEventListener("submit", (event) => {
     event.preventDefault();

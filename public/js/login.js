@@ -1,14 +1,14 @@
 import { showAlert } from "./alerts";
 import axios from 'axios'
 import ApiLinks from './../../constant/apiLink'; 
-export const login = async (email, password) => {
+export const loginOrSingup = async (data , type) => {
   try {
-    const res = await axios.post(ApiLinks.login, { email, password });
+    const res = await axios.post(type==='login'? ApiLinks.login :ApiLinks.signup,data);
 
     console.log(res); // Debugging: Print the response
 
     if (res.data && res.data.status === "success") {
-      showAlert("success", "Login Successfully!");
+      showAlert("success", `${type ==='login' ?"Login": "Signup"} Successfully!`);
       window.setTimeout(() => {
         location.assign("/");
       }, 1500);
@@ -21,7 +21,7 @@ export const login = async (email, password) => {
     console.error(err); // Debugging: Print full error object
 
     // Ensure 'err.response' and 'err.response.data' exist before accessing properties
-    const errorMessage = err.response?.data?.message || "Login failed. Try again.";
+    const errorMessage = err.response?.data?.message || `${type ==='login' ?"Login": "Signup"} failed. Try again.`;
     showAlert("error", errorMessage);
   }
 };

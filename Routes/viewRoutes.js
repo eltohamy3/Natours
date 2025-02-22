@@ -8,6 +8,8 @@ router.use(authController.isLoggedIn);
 router.get('/' ,bookingController.creatBookingCheckout , viewController.overview);
 router.get('/tour/:tourSlug' ,viewController.tourDetail) ;
 router.get('/login' ,viewController.getLoginForm) ;
+router.get('/signup' ,viewController.getSignupForm) ;
+
 router.get('/me' ,viewController.account) ;
 router.get('/my-tours' ,authController.protect , viewController.getMyTours) ;
 
