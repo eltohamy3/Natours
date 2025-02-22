@@ -1,4 +1,4 @@
-const serverLink = 'http://127.0.0.1:8000'
+const serverLink = ''
 const apiLink =   `${serverLink}/api/v1`; 
 exports.getAllTour = `${apiLink}/tours`; 
 exports.login = `${apiLink}/users/login`; 

@@ -11833,7 +11833,7 @@ exports.CanceledError = CanceledError;
 exports.AxiosError = AxiosError;
 exports.Axios = Axios;
 },{"./lib/axios.js":"../../node_modules/axios/lib/axios.js"}],"../../constant/apiLink.js":[function(require,module,exports) {
-var serverLink = 'http://127.0.0.1:8000';
+var serverLink = '';
 var apiLink = "".concat(serverLink, "/api/v1");
 exports.getAllTour = "".concat(apiLink, "/tours");
 exports.login = "".concat(apiLink, "/users/login");
